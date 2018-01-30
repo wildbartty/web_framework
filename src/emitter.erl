@@ -16,7 +16,10 @@
 %%%===================================================================
 
 css([[X, Y] | Rest]) ->
-    [block(X), append(X,Y), Rest].
+    [block(X,Y), css(Rest)];
+css([]) ->
+    [].
+
 
 html(undefined)->
     [];
@@ -44,16 +47,23 @@ html([]) ->
 %%% Internal functions
 %%%===================================================================
 
-%% is_integer_string(S) ->
-%%     try
-%%         _ = list_to_integer(S),
-%%         true
-%%     catch error:badarg ->
-%% 	    false
-%%     end.
-
 block(X) ->
     [${, 10, X,10, $}].
+block(X,Y)->
+    %% this means a space character
+    %%             ||
+    %%             \/
+    [to_string(X), $ , ${, 10, map_vals(Y), $}, 10].
+
+
+map_vals([]) ->
+    [];
+map_vals(Y = #{}) ->
+    Fun = fun (K,V) ->
+		  [9, to_string(K),32 , $:,32, to_string(V), $;, 10]
+	  end,
+    maps:values(maps:map(Fun,Y)).
+
 
 append(X,Y) ->
     [X,Y].

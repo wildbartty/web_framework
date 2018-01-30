@@ -15,25 +15,36 @@
 %%% API
 %%%===================================================================
 
-css([[X, Y] | Rest]) ->
+-type proplist() :: [{term(), term()}].
+
+-spec css(proplist()) -> iolist().
+
+css([{X, Y} | Rest]) ->
     [block(X,Y), css(Rest)];
 css([]) ->
     [].
 
+%% html/1 takes a list and returns an io list
 
-html(undefined)->
+-spec html(undefined | list() | integer() | binary()) ->
+    iolist().
+
+html(X) ->
+    html_priv(X).
+
+html_priv(undefined)->
     [];
-html([X]) ->
+html_priv([X]) ->
     [open_close_tag(X)];
-html([X, Y]) ->
+html_priv([X, Y]) ->
     [open_tag(X,Y), close_tag(X)];
-html(X) when is_integer(hd(X)); is_binary(X) ->
+html_priv(X) when is_integer(hd(X)); is_binary(X) ->
     X;
-html(X) when is_number(X) ->
+html_priv(X) when is_number(X) ->
     to_string(X);
-html([X, Y |Z]) ->
-    [open_tag(X,Y), lists:map(fun html/1, Z), close_tag(X)];
-html([]) ->
+html_priv([X, Y |Z]) ->
+    [open_tag(X,Y), lists:map(fun html_priv/1, Z), close_tag(X)];
+html_priv([]) ->
     [].
 
 
@@ -47,8 +58,6 @@ html([]) ->
 %%% Internal functions
 %%%===================================================================
 
-block(X) ->
-    [${, 10, X,10, $}].
 block(X,Y)->
     %% this means a space character
     %%             ||
@@ -64,9 +73,6 @@ map_vals(Y = #{}) ->
 	  end,
     maps:values(maps:map(Fun,Y)).
 
-
-append(X,Y) ->
-    [X,Y].
 
 quote(X) ->
     %% Quotes xml things

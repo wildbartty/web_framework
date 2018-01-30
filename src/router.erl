@@ -1,4 +1,4 @@
--module(web_framework).
+-module(router).
 
 -import(proplists, [lookup/2]).
 

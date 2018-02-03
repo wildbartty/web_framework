@@ -62,14 +62,14 @@ add_page(Args) ->
     {style, Style} = lookup(style,Args, undefined),
     {scripts, Scripts} = lookup(scripts, Args, undefined),
     Page = #my_web_pages{name =  iolist_to_bin(Name),
-    			 header = iolist_to_bin(Header),
-    			 style =  iolist_to_bin(Style),
-    			 scripts =iolist_to_bin(Scripts),
-    			 title =  iolist_to_bin(Title),
-    			 page =   iolist_to_bin(Page0)},
+			 header = iolist_to_bin(Header),
+			 style =  iolist_to_bin(Style),
+			 scripts =iolist_to_bin(Scripts),
+			 title =  iolist_to_bin(Title),
+			 page =   iolist_to_bin(Page0)},
     Write = fun () ->
-    		    mnesia:write(Page)
-    	    end,
+		    mnesia:write(Page)
+	    end,
     mnesia:transaction(Write).
 
 the_404_page() ->

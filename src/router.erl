@@ -4,12 +4,10 @@
 
 -import_lib("stdlib/include/qlc.hrl").
 
--compile(export_all).
-
 -export([initDB/0]).
 -export([get_all_pages/0, get_page/1]).
 -export([add_page/1]).
--export([build_page/1]).
+-export([build_page/1, render_page/1]).
 
 -record(my_web_pages, {name,
 		       header,
@@ -94,7 +92,7 @@ maybe_html(Name, Thing) ->
     [Name, [], Thing].
 
 build_page(_ = #my_web_pages{title = Title, style = Style, scripts = Scripts,
-			     header = Header, name = Name, page = Page}) ->
+			     header = Header, name = _Name, page = Page}) ->
     iolist_to_bin(emitter:html([html, [],
 				[head, [], 
 				 maybe_html(title, Title),

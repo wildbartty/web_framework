@@ -4,9 +4,9 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created :  3 Feb 2018 by  <wildbartty@cornerstone>
+%%% Created :  4 Feb 2018 by  <wildbartty@cornerstone>
 %%%-------------------------------------------------------------------
--module(server).
+-module(endpoint).
 
 -behaviour(gen_server).
 
@@ -19,7 +19,7 @@
 
 -define(SERVER, ?MODULE).
 
--record(state, {}).
+-record(state, {module,}).
 
 %%%===================================================================
 %%% API
@@ -33,7 +33,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_server:start_link(?MODULE, [], []).
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %%%===================================================================
 %%% gen_server callbacks

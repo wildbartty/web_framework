@@ -9,12 +9,28 @@
 -module(parser).
 
 %% API
--export([]).
+-export([xml/1]).
+-export([test/0]).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
+%%--------------------------------------------------------------------
+%% @doc
+%%   Parses a string that is valid xml, and returns a tree of strings
+%% @spec
+%% @end
+%%--------------------------------------------------------------------
+
+test_string() ->
+    "<x> hi </x>".
+
+test() ->
+    xml(test_string()).
+
+xml(X) ->
+    xml([], X, parse, []).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -25,3 +41,11 @@
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+xml(List, [$< | Rest], parse, _) ->
+    xml(List, Rest, start_start, []);
+xml(List, [$> | Rest] , start_start, Name) ->
+    xml([Name | List], Rest, parse, []);
+xml(List, [X | Rest], start_start, Name) ->
+    xml(List, Rest, start_start, [X | Name]).
+

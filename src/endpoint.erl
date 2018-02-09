@@ -4,14 +4,14 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created :  3 Feb 2018 by  <wildbartty@cornerstone>
+%%% Created :  4 Feb 2018 by  <wildbartty@cornerstone>
 %%%-------------------------------------------------------------------
--module(server).
+-module(endpoint).
 
 -behaviour(gen_server).
 
 %% API
--export([start_link/0]).
+-export([start_link/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -19,7 +19,7 @@
 
 -define(SERVER, ?MODULE).
 
--record(state, {}).
+-record(state, {module, port}).
 
 %%%===================================================================
 %%% API
@@ -29,11 +29,17 @@
 %% @doc
 %% Starts the server
 %%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
+%% @spec start_link(Module) -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
-start_link() ->
-    gen_server:start_link(?MODULE, [], []).
+
+-callback start_link(Module :: atom()) ->
+    {ok, Pid :: pid()} | 
+    {error, {already_started, Pid :: pid()}} |
+    {error, Reason :: term()}.
+
+start_link(Module) ->
+    gen_server:start_link(?MODULE, [Module], []).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -52,7 +58,10 @@ start_link() ->
 %%--------------------------------------------------------------------
 init([]) ->
     process_flag(trap_exit, true),
-    {ok, #state{}}.
+    {ok, #state{}};
+init([Module]) ->
+    process_flag(trap_exit, true),
+    {ok, #state{module = Module}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -82,6 +91,10 @@ handle_call(_Request, _From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+
+handle_cast(print, State) ->
+    io:format("~p~n", [State#state.module]),
+    {noreply, State};
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
@@ -126,3 +139,4 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+

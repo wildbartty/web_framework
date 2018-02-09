@@ -4,8 +4,8 @@
 
 -import_lib("stdlib/include/qlc.hrl").
 
--export([initDB/0]).
--export([get_all_pages/0, get_page/1]).
+-export([table_exists/1, initDB/0]).
+-export([get_all_pages/0, get_all_pages/1, get_page/1]).
 -export([add_page/1]).
 -export([build_page/1, render_page/1]).
 
@@ -15,17 +15,26 @@
 		       scripts,
 		       title,
 		       page}).
-initDB()->
+
+table_exists(Table) ->
+    List = ets:all(),
+    lists:member(Table, List).
+
+init_db(Table)->
     mnesia:create_schema([node()]),
     mnesia:start(),
-    {Ret,Rea} = mnesia:create_table(my_web_pages, [{attributes,
-						    record_info(fields
-							       ,my_web_pages)},
+    case table_exists(Table) of
+	false -> mnesia:create_table(Table, [{attributes,
+						    record_info(fields,
+								my_web_pages)},
 						   {type, set},
-						   {disc_copies, [node()]}]),
-    if (Ret =:= atomic) -> ok;
-       true -> {Ret, Rea}
+							{disc_copies, [node()]}]);
+       true ->
+	    {exists, ok}
     end.
+
+initDB()->
+    init_db(my_web_pages).
 
 lookup(Key, List, Default) ->
     Result = lookup(Key, List),
@@ -47,10 +56,6 @@ iolist_to_bin(X) when is_function(X); is_tuple(X) ->
     X;
 iolist_to_bin(X) ->
     iolist_to_binary(X).
-
-
-
-
 
 add_page(Args) ->
     {page,Page0} = lookup(page, Args, undefined),
@@ -87,6 +92,7 @@ get_page(Page) ->
 maybe_html(_,undefined) ->
     [];
 maybe_html(nothing,Thing) ->
+    %% Put thing in unescaped
     Thing;
 maybe_html(Name, Thing) ->
     [Name, [], Thing].
@@ -102,9 +108,12 @@ build_page(_ = #my_web_pages{title = Title, style = Style, scripts = Scripts,
 				[body, [],
 				 Page]])).
 
-get_all_pages() ->
+get_all_pages()->
+    get_all_pages(my_web_pages).
+
+get_all_pages(Table) ->
     Read = fun () ->
-		   mnesia:match_object(#my_web_pages{_ = '_'})
+		   mnesia:match_object(Table, #my_web_pages{_ = '_'}, read)
 	   end,
     mnesia:transaction(Read).
 

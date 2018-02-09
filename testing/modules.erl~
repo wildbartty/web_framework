@@ -4,43 +4,20 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created :  1 Feb 2018 by  <wildbartty@cornerstone>
+%%% Created :  4 Feb 2018 by  <wildbartty@cornerstone>
 %%%-------------------------------------------------------------------
--module(echo).
+-module(modules).
 
 %% API
--export([echo/0]).
-
+-export([]).
 -compile(export_all).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
-echo() ->
-    modules:current_module().
-
-loop() ->
-    {ok,Socket} = gen_tcp:listen(8888, []),
-    loop(Socket).
-
-loop(Socket) ->
-    receive
-	exit ->
-	    ok
-    after 0 ->
-	    Handler = gen_tcp:accept(Socket),
-	    receive
-		{tcp, Handler, Packet} ->
-		    io:format(Packet, []),
-		    loop(Socket)
-	    end
-    end.
-
-handle(Socket, Tuple) ->
-    gen_tcp:send(Socket,Tuple),
-    io:format("~p~n", [Tuple]),
-    ok.
+current_module() ->
+    ?MODULE.
 
 %%--------------------------------------------------------------------
 %% @doc
